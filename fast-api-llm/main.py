@@ -1,44 +1,31 @@
 from typing import Union
 from typing import Annotated
 
-from fastapi import FastAPI,Header
+from fastapi import FastAPI, Header
+from interfaces import Query, TrainBody
 
-from interfaces import Query
-
-from model import ModelManager
-from storewithcache import CacheManager
-
-
+from managers_init import SubModel
+from celeryTask import train_model
 
 app = FastAPI()
-
-
-cache_manager = CacheManager()
-model_manager = ModelManager(cache_manager)
-
-# Example usage
-document = "Example document for training."
-model = model_manager.train_model(document)
-model_key = "model_key"
-
-model_manager.save_model(model_key, model)
-response = model_manager.use_model(model_key, "New document for prediction.")
-print(response)
-
-
-
-
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
-
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
+@app.post("/api/v1/train")
+def read_item(train_data: TrainBody):
+    train_model.delay(train_data.model_key, train_data.file_path)
+    return {"response": "success"} 
 
-@app.post("/query")
+@app.post("/api/v1/query")
 def read_item( query: Query, user_agent: Annotated[str | None, Header()] = None ):
-    return { "query": query.query, "status": "success" }
+    model_key = query.user  if query.user else "yashgunjal98@gmail.com"
+    response = SubModel.use_model(model_key, query.query )
+    print(response)
+    return  response
+
