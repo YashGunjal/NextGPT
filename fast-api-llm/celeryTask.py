@@ -13,7 +13,7 @@ s3_secret=os.getenv("AWS_SECRET_KEY")
 bucket_name= os.getenv("S3_BUCKET_NAME")
 
 celery = Celery(
-    "tasks",
+    "model_tasks",
     broker=redis_url,
     backend=redis_url
 )
