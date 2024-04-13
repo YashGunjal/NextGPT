@@ -1,0 +1,27 @@
+# Example usage
+document = "Example document for training."
+model = model_manager.train_model(document)
+model_key = "model_key"
+
+model_manager.save_model(model_key, model)
+response = model_manager.use_model(model_key, "New document for prediction.")
+print(response)
+
+
+
+python -m uvicorn main:app --reload
+python -m celery -A main.celery worker --loglevel=info
+python -m celery -A celeryTask.celery flower --port=5555
+
+
+# fetch if a model already exists for that user before training 
+
+
+import time
+from timeit import default_timer as timer
+
+pip freeze > requirements.txt
+
+
+import os
+print(os.getenv("MY_KEY"))
